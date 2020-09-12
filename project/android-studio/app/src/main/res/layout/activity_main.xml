@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.widget.RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <org.ostteam.audiorecorder.android.SamplesGraph
+        android:id="@+id/graphSamples"
+        android:layout_width="match_parent"
+        android:layout_height="64sp"
+        android:layout_centerHorizontal="true"
+        android:gravity="center_vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/txtTittle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/graphSamples"
+        android:layout_centerHorizontal="true"
+        android:gravity="center_vertical"
+        android:text="Toca para iniciar grabación"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/txtTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/micButton"
+        android:layout_below="@id/graphSamples"
+        android:layout_centerHorizontal="true"
+        android:gravity="center_vertical"
+        android:onClick="btnTime"
+        android:text="00:00.000"
+        android:textAlignment="center"
+        android:textSize="36sp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageButton
+        android:id="@+id/micButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="false"
+        android:layout_centerInParent="true"
+        android:background="#00FFFFFF"
+        android:onClick="btnMicAction"
+        android:tint="#52B240"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.39"
+        app:srcCompat="@mipmap/mic" />
+
+    <ImageButton
+        android:id="@+id/btnPlayBig"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="false"
+        android:layout_centerInParent="true"
+        android:background="#00FFFFFF"
+        android:onClick="btnPlayBig"
+        android:tint="#52B240"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.39"
+        app:srcCompat="@mipmap/play_big" />
+
+    <org.ostteam.audiorecorder.android.TimelineGraph
+        android:id="@+id/playTimeline"
+        android:layout_width="match_parent"
+        android:layout_height="64sp"
+        android:layout_below="@id/micButton"
+        android:layout_centerHorizontal="true"
+        android:gravity="center_vertical"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageButton
+        android:id="@+id/btnPlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/playTimeline"
+        android:layout_alignParentBottom="true"
+        android:background="#00FFFFFF"
+        android:onClick="btnPlay"
+        android:tint="#52B240"
+        app:srcCompat="@mipmap/play"
+        tools:layout_editor_absoluteX="70dp" />
+
+    <ImageButton
+        android:id="@+id/btnStop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/playTimeline"
+        android:layout_alignParentBottom="true"
+        android:background="#00FFFFFF"
+        android:onClick="btnStop"
+        android:tint="#B24440"
+        app:srcCompat="@mipmap/stop"
+        tools:layout_editor_absoluteX="233dp"
+        tools:layout_editor_absoluteY="497dp" />
+
+    <ImageButton
+        android:id="@+id/btnDone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/playTimeline"
+        android:layout_alignParentBottom="true"
+        android:background="#00FFFFFF"
+        android:onClick="btnShare"
+        android:tint="#52B240"
+        app:srcCompat="@mipmap/done"
+        tools:layout_editor_absoluteX="70dp" />
+
+    <ImageButton
+        android:id="@+id/btnDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/playTimeline"
+        android:layout_alignParentBottom="true"
+        android:background="#00FFFFFF"
+        android:onClick="btnDelete"
+        android:tint="#B24440"
+        app:srcCompat="@mipmap/delete"
+        tools:layout_editor_absoluteX="233dp" />
+
+</android.widget.RelativeLayout>

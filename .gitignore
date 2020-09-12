@@ -1,0 +1,11 @@
+**/.idea/workspace.xml
+**/.idea/tasks.xml
+.gradle
+project/android-studio/app/src/obj
+project/xcode/osaudiorecorder-core/osaudiorecorder.xcodeproj/xcuserdata
+project/xcode/osaudiorecorder.xcworkspace/xcuserdata
+src/opus
+src/flac
+
+project/android-studio/app/build
+project/android-studio/build

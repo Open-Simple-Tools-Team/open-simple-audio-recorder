@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/Open Simple Audio Recorder.iml" filepath="$PROJECT_DIR$/Open Simple Audio Recorder.iml" group="Open Simple Audio Recorder" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="Open Simple Audio Recorder/app" />
+    </modules>
+  </component>
+</project>
