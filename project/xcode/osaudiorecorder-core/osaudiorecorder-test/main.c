@@ -34,7 +34,8 @@ typedef struct STARRiffWaveChunckFmt_ {
 int main(int argc, const char * argv[]) {
 	// insert code here...
 	printf("Start-of-program....\n");
-	{
+	//Record and encoding test
+	if(TRUE){
 		STOSAudioRecorder rec;
 		if(!OSAudioRecorder_init(&rec)){
 			printf("ERROR, 'OSAudioRecorder_init' failed.\n");
@@ -94,124 +95,60 @@ int main(int argc, const char * argv[]) {
 			}
 			OSAudioRecorder_release(&rec);
 		}
-		/*STNix_Engine nix;
-		NixUI32 capabilities;
-		if(!nixInit(&nix, 0)){
-			printf("ERROR, 'nixInit' failed.\n");
-		} else {
-			nixContextActivate(&nix); //good practice (does nothing for OpenSL/Android)
-			//Eval capabilities
-			capabilities = nixCapabilities(&nix);
-			if((capabilities & NIX_CAP_AUDIO_CAPTURE) == 0){
-				printf("ERROR, current device cannot capture audio.\n");
-			} else {
-				const char* filepath = "/Users/mortegam/Desktop/test.wav";
-				FILE* file = fopen(filepath, "wb+");
-				if(file == NULL){
-					printf("ERROR, 'fopen' failed for path '%s'.\n", filepath);
-				} else {
-					const STNix_audioDesc capDesc = {
-						.samplesFormat	= ENNix_sampleFormat_int,
-						.channels		= 1,
-						.bitsPerSample	= 16,
-						.samplerate		= 22050,
-						.blockAlign		= (16 / 8) * 1 //ToDo: try zero
-					};
-					const NixUI16 buffersCount = 32;
-					const NixUI16 samplesPerBuffer = (capDesc.samplerate / buffersCount);
-					long waveSzPos = 0, dataHeadPos = 0;
-					//Write WAV/RIFF header
-					{
-						//RIFF
-						{
-							NixUI32 fileSz = 0;
-							fwrite("RIFF", 4, 1, file);
-							waveSzPos	= ftell(file);
-							fwrite(&fileSz, sizeof(fileSz), 1, file);
-						}
-						//Wave
-						{
-							fwrite("WAVE", 4, 1, file);
-						}
-						//format chunk
-						{
-							STARRiffWaveChunckFmt fmtHead;
-							memset(&fmtHead, 0, sizeof(fmtHead));
-							fmtHead.head.cid[0]		= 'f';
-							fmtHead.head.cid[1]		= 'm';
-							fmtHead.head.cid[2]		= 't';
-							fmtHead.head.cid[3]		= ' ';
-							fmtHead.head.size		= sizeof(fmtHead) - sizeof(fmtHead.head);
-							fmtHead.format			= (capDesc.samplesFormat == ENNix_sampleFormat_float ? WAVE_FORMAT_IEEE_FLOAT : WAVE_FORMAT_PCM);
-							fmtHead.channels		= capDesc.channels;
-							fmtHead.samplesPerSec	= capDesc.samplerate;
-							fmtHead.avgBytesPerSec	= (capDesc.samplerate * capDesc.bitsPerSample * capDesc.channels) / 8;
-							fmtHead.blocksAlign		= capDesc.blockAlign;
-							fmtHead.bitsPerSample	= capDesc.bitsPerSample;
-							fwrite(&fmtHead, sizeof(fmtHead), 1, file);
-						}
-						//data chunck
-						{
-							STARRiffWaveChunckHead head;
-							memset(&head, 0, sizeof(head));
-							head.cid[0]	= 'd';
-							head.cid[1]	= 'a';
-							head.cid[2]	= 't';
-							head.cid[3]	= 'a';
-							head.size	= 0;
-							dataHeadPos	= ftell(file);
-							fwrite(&head, sizeof(head), 1, file);
-						}
-						fflush(file);
-					}
-					if(!nixCaptureInit(&nix, &capDesc, buffersCount, samplesPerBuffer, &test_CaptureBufferFilledCallback, &file)){
-						printf("ERROR, could not start audio capture.\n");
-					} else {
-						//Start
-						nixCaptureStart(&nix);
-						//Wait few seconds
-						{
-							unsigned long long slept = 0;
-							while(slept < (5 * 1000000)){
-								usleep(100000);
-								slept += 100000; 
-								nixTick(&nix);
-							}
-						}
-						//End
-						nixCaptureStop(&nix);
-						//update the size fo the 'data' sub-chunk
-						{
-							long finalPos = ftell(file);
-							if(dataHeadPos < finalPos){
-								const NixUI32 dataSz = (NixUI32)(finalPos - dataHeadPos - sizeof(STARRiffWaveChunckHead));
-								//Write 'data' padding byte
-								if((dataSz % 2) != 0){
-									const char padd = '\0';
-									fwrite(&padd, sizeof(padd), 1, file);
-									finalPos++;
-								}
-								fseek(file, dataHeadPos + 4, SEEK_SET);
-								fwrite(&dataSz, sizeof(dataSz), 1, file);
-								fflush(file);
-								//Update the size of the 'WAVE' chunk
-								if(finalPos > 8){
-									NixUI32 fileSz = (NixUI32)(finalPos - 8);
-									fseek(file, waveSzPos, SEEK_SET);
-									fwrite(&fileSz, sizeof(fileSz), 1, file);
-									fflush(file);
-								}
-							}
-						}
-					}
-					fclose(file);
-					file = NULL;
-				}
-				
-			}
-			nixFinalize(&nix);
-		}*/
 	}
+	//Encoding test
+	if(TRUE){
+		STOSAudioRecorder rec;
+		if(!OSAudioRecorder_init(&rec)){
+			printf("ERROR, 'OSAudioRecorder_init' failed.\n");
+		} else {
+			const char* filepath = "/Users/mortegam/Downloads/_audio.wav";
+			//Encode FLAC
+			{
+				const char* filepathDst = "/Users/mortegam/Downloads/_audio_mine.flac";
+				if(!OSAudioRecorder_encoderStart(&rec, filepath, filepathDst, "flac")){
+					printf("ERROR, 'OSAudioRecorder_encoderStart' failed.\n");
+				} else {
+					//Wait few seconds
+					float prog = 0.0f;
+					while(OSAudioRecorder_encoderIsLoaded(&rec)){
+						usleep(100000);
+						prog = OSAudioRecorder_encoderRelProgress(&rec); //never 1.0f unless done
+						printf("INFO, 'OSAudioRecorder_encoderRelProgress': %d%%.\n", (int)(prog * 100.0f));
+						if(prog >= 1.0f){
+							break;
+						}
+					}
+					OSAudioRecorder_encoderFinish(&rec);
+				}
+			}
+			//Encode OPUS
+			{
+				const char* filepathDst = "/Users/mortegam/Downloads/_audio_mine.opus";
+				if(!OSAudioRecorder_encoderStart(&rec, filepath, filepathDst, "opus")){
+					printf("ERROR, 'OSAudioRecorder_encoderStart' failed.\n");
+				} else {
+					//Wait few seconds
+					float prog = 0.0f;
+					while(OSAudioRecorder_encoderIsLoaded(&rec)){
+						usleep(100000);
+						prog = OSAudioRecorder_encoderRelProgress(&rec); //never 1.0f unless done
+						printf("INFO, 'OSAudioRecorder_encoderRelProgress': %d%%.\n", (int)(prog * 100.0f));
+						if(prog >= 1.0f){
+							break;
+						}
+					}
+					OSAudioRecorder_encoderFinish(&rec);
+				}
+			}
+			OSAudioRecorder_release(&rec);
+		}
+	}
+	//Wait for debugging tools
+	/*while(TRUE){
+		sleep(1);
+	}*/
+	//
 	printf("...end-of-program.\n");
 	return 0;
 }

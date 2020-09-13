@@ -300,6 +300,49 @@ LOCAL_SRC_FILES		+= \
 
 include $(BUILD_STATIC_LIBRARY)
 
+#------------------------------
+#- CORE LIBOGG (static library) -
+#------------------------------
+
+#xcode
+#-I$(PROJECT_DIR)/../../../src/libogg/include/
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE		:= osaudiorecorder-core-libogg
+
+LOCAL_C_INCLUDES	:=
+LOCAL_SRC_FILES		:= 
+
+LOCAL_CFLAGS		+= 
+
+LOCAL_C_INCLUDES	+= \
+  $(AR_INC_ROOT)/libogg/include
+
+#armeabi-v7a, arm64-v8a, x86, x86_64
+
+ifneq (,$(findstring arm,$(TARGET_ARCH_ABI)))
+  #ARM specifics
+  LOCAL_C_INCLUDES	+= 
+  LOCAL_SRC_FILES	+= \
+    
+  LOCAL_SRC_FILES	+= \
+    
+else ifneq (,$(findstring x86,$(TARGET_ARCH_ABI)))
+  #x86 specifics
+  LOCAL_C_INCLUDES	+= 
+  LOCAL_SRC_FILES	+= \
+    
+  LOCAL_SRC_FILES	+= \
+    
+endif
+
+LOCAL_SRC_FILES		+= \
+  $(AR_SRC_ROOT)/libogg/src/framing.c \
+  $(AR_SRC_ROOT)/libogg/src/bitwise.c
+
+include $(BUILD_STATIC_LIBRARY)
+
 #-------------------------
 #- CORE (shared library) -
 #-------------------------
@@ -308,11 +351,12 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE		:= osaudiorecorder-core
 
-LOCAL_STATIC_LIBRARIES	:= osaudiorecorder-core-flac osaudiorecorder-core-opus
+LOCAL_STATIC_LIBRARIES	:= osaudiorecorder-core-flac osaudiorecorder-core-opus osaudiorecorder-core-libogg
 
 LOCAL_LDLIBS		:= -llog -lOpenSLES -landroid
 
 LOCAL_C_INCLUDES	+= \
+  $(AR_INC_ROOT)/libogg/include \
   $(AR_INC_ROOT)/nixtla-audio
 
 LOCAL_SRC_FILES		+= \

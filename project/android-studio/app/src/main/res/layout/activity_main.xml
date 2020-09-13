@@ -23,7 +23,7 @@
         android:layout_below="@id/graphSamples"
         android:layout_centerHorizontal="true"
         android:gravity="center_vertical"
-        android:text="Toca para iniciar grabación"
+        android:text="@string/tit_rec_start"
         android:textAlignment="center"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"

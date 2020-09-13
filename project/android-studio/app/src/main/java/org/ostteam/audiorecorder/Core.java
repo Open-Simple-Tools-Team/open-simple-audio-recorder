@@ -2,6 +2,11 @@ package org.ostteam.audiorecorder;
 
 public class Core {
 
+    // Used to load the 'native-lib' library on application startup.
+    static {
+        System.loadLibrary("osaudiorecorder-core");
+    }
+
     private long _core = 0;      //c-pointer managed at JNI
 
     public Core(){

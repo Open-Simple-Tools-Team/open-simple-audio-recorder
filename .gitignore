@@ -9,3 +9,5 @@ src/flac
 
 project/android-studio/app/build
 project/android-studio/build
+src/libogg
+project/android-studio/app/release

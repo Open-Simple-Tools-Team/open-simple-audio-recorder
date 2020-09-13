@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Open Simple Audio Recorder</string>
+    <string name="perm_not_granted">Permiso no otorgado</string>
+    <string name="tit_paused">Pausado</string>
+    <string name="tit_playing">Reproduciendo...</string>
+    <string name="tit_err_retry">Error, toca para intentar de nuevo</string>
+    <string name="tit_rec_start">Toca para iniciar grabación</string>
+    <string name="tit_rec_again">Toca para volver a grabar</string>
+    <string name="tit_rec_paused">Pausado, toca para continuar grabación</string>
+    <string name="tit_rec_active">Grabando...</string>
+    <string name="tit_enc_active">Codificando...</string>
+    <string name="enc_bussy">Otro codificador está en progreso...</string>
+    <string name="enc_err_start">Codificador falló en iniciar.</string>
+    <string name="enc_done">Codificación completada</string>
+    <string name="fmt_desc_wav">WAV (sin comprimir)</string>
+    <string name="fmt_desc_flac">Flac (comprimido)</string>
+    <string name="fmt_desc_opus">Opus (voz, recomendado)</string>
+</resources>

@@ -1337,18 +1337,25 @@ OSARBool OSAudioRecorder_encoderFinish(STOSAudioRecorder* obj){ //Cancel
 
 //Opus
 
+#include "ogg/ogg.h"
 #include "opus/include/opus.h"
 
 #define OPUS_MAX_PACKET (1500)
 
 typedef struct STOSAudioRecorderEncoderOpusState_ {
-	OpusEncoder*	encoder;
-	unsigned char	packet[OPUS_MAX_PACKET + 257];
-	int				channels;
-	int				bitsPerSample;
-	int				samplerate;
-	int				blockAlign;
-	int				samplesTotal;
+	OpusEncoder*		encoder;
+	ogg_stream_state*	oggStream;
+	int					oggPacketsCount;
+	unsigned char		packet[OPUS_MAX_PACKET + 257];
+	int					channels;
+	int					bitsPerSample;
+	long				samplerate;
+	int					blockAlign;
+	long				samplesTotal;
+	long				sampleProcessed;
+	//
+	int					firstFeedSamplesCount;	//All feeds must have the same ammount of samples, except the last one.
+	OSARBool			isEndOfStreamSet;		//las page done (smaller packages than first page)
 } STOSAudioRecorderEncoderOpusState;
 
 void* OSAudioRecorderEncoderOpusStart(FILE* dst, int channels, int bitsPerSample, int samplerate, int blockAlign, int samplesTotal){ 
@@ -1387,9 +1394,86 @@ void* OSAudioRecorderEncoderOpusStart(FILE* dst, int channels, int bitsPerSample
 			state->samplerate	= samplerate;
 			state->blockAlign	= blockAlign;
 			state->samplesTotal	= samplesTotal;
-			//Consume
-			r = state;
-			encoder = NULL;
+			state->sampleProcessed = 0;
+			state->firstFeedSamplesCount	= 0;		//All feeds must have the same ammount of samples, except the last one.
+			state->isEndOfStreamSet			= FALSE;	//las page done (smaller packages than first page)
+			state->oggStream	= (ogg_stream_state*)malloc(sizeof(ogg_stream_state));
+			state->oggPacketsCount	= 0;
+			if(ogg_stream_init(state->oggStream, rand()) != 0){
+				OSAR_PRINTF_ERROR("'ogg_stream_init' failed.\n");
+			} else {
+				//Opus in Ogg
+				//https://tools.ietf.org/html/rfc7845#section-5.1
+				//Write first header (Id)
+				{
+					ogg_packet pack; ogg_page page;
+					const unsigned char* samplerateBytes = (const unsigned char*)&samplerate;
+					unsigned char header[19];
+					memset(header, 0, sizeof(header));
+					header[0] = 'O'; header[1] = 'p'; header[2] = 'u'; header[3] = 's';
+					header[4] = 'H'; header[5] = 'e'; header[6] = 'a'; header[7] = 'd';
+					header[8] = 1; //version
+					header[9] = 1; //channel count (stream channels, not audio channels)
+					header[10] = header[11] = 0; //Pre-skip
+					header[12] = samplerateBytes[0]; header[13] = samplerateBytes[1]; header[14] = samplerateBytes[2]; header[15] = samplerateBytes[3]; //Input Sample Rate (Hz) 
+					header[16] = header[17] = 0; //Output Gain (Q7.8 in dB)
+					header[18] = 0; //Mapping Family
+					//
+					pack.packet		= header;
+					pack.bytes		= sizeof(header);
+					pack.b_o_s		= 1;
+					pack.e_o_s		= 0;
+					pack.granulepos	= 0;
+					pack.packetno	= state->oggPacketsCount++;
+					if(ogg_stream_packetin(state->oggStream, &pack) != 0){
+						OSAR_PRINTF_ERROR("'ogg_stream_packetin(id-header)' failed.\n");
+					} else if(ogg_stream_flush(state->oggStream, &page) == 0){
+						OSAR_PRINTF_ERROR("'ogg_stream_flush(id-header)' failed.\n");
+					} else if(fwrite(page.header, 1, page.header_len, dst) != page.header_len){
+						OSAR_PRINTF_ERROR("'fwrite(page.header)(id-header)' failed.\n");
+					} else if(fwrite(page.body, 1, page.body_len, dst) != page.body_len){
+						OSAR_PRINTF_ERROR("'fwrite(page.body)(id-header)' failed.\n");
+					} else {
+						//Write second header (Comment)
+						unsigned char header[20];
+						memset(header, 0, sizeof(header));
+						header[0] = 'O'; header[1] = 'p'; header[2] = 'u'; header[3] = 's';
+						header[4] = 'T'; header[5] = 'a'; header[6] = 'g'; header[7] = 's';
+						header[8] = header[9] = header[10] = header[11] = 0;		//Vendor String Length
+						header[12] = header[13] = header[14] = header[15] = 0;	// User Comment List Length
+						pack.packet		= header;
+						pack.bytes		= sizeof(header);
+						pack.b_o_s		= 0;
+						pack.e_o_s		= 0;
+						pack.granulepos	= 0;
+						pack.packetno	= state->oggPacketsCount++;
+						if(ogg_stream_packetin(state->oggStream, &pack) != 0){
+							OSAR_PRINTF_ERROR("'ogg_stream_packetin(comment-header)' failed.\n");
+						} else if(ogg_stream_flush(state->oggStream, &page) == 0){
+							OSAR_PRINTF_ERROR("'ogg_stream_flush(comment-header)' failed.\n");
+						} else if(fwrite(page.header, 1, page.header_len, dst) != page.header_len){
+							OSAR_PRINTF_ERROR("'fwrite(page.header)(comment-header)' failed.\n");
+						} else if(fwrite(page.body, 1, page.body_len, dst) != page.body_len){
+							OSAR_PRINTF_ERROR("'fwrite(page.body)(comment-header)' failed.\n");
+						} else {
+							//Consume
+							r = state;
+							state = NULL;
+							encoder = NULL;
+						}
+					}
+				}
+			}
+			//Release (if not consumed)
+			if(state != NULL){
+				if(state->oggStream != NULL){
+					ogg_stream_clear(state->oggStream); //equivalent to 'ogg_stream_destroy()' without 'free()'.
+					free(state->oggStream);
+					state->oggStream = NULL;
+				}
+				free(state);
+				state = NULL;
+			}
 		}
 		//Release (if not consumed)
 		if(encoder != NULL){
@@ -1409,19 +1493,73 @@ OSARBool OSAudioRecorderEncoderOpusFeed(void* userData, FILE* dst, void* samples
 			//ToDo: asuming 16-bits, 1-channel samples
 			opus_int16* data = (opus_int16*)samples;
 			opus_int32 len = 0; long iSample = 0;
-			r = TRUE;
-			while(iSample < samplesCount){
-				len = opus_encode(encoder, &data[iSample], (int)samplesCount, state->packet, OPUS_MAX_PACKET);
-				if(len < 0 || len > OPUS_MAX_PACKET){
-					OSAR_PRINTF_ERROR("'opus_encode' failed.\n");
-					r = FALSE;
-					break;
-				} else if(fwrite(state->packet, len, 1, dst) != 1){
-					OSAR_PRINTF_ERROR("'opus'/fwrite failed.\n");
-					r = FALSE;
-					break;
+			ogg_packet pack; ogg_page page;
+			//Make sure at least 2.5ms of samples are written
+			if(!state->isEndOfStreamSet && (samplesCount >= (state->samplerate * 5 / 2000) || state->firstFeedSamplesCount == 0)){
+				r = TRUE;
+				//Validate samples size
+				if(state->firstFeedSamplesCount == 0){
+					//Set feed samples per call (only on the first call)
+					//Subsequent calls are expetced to be the same size, except of last frame.
+					state->firstFeedSamplesCount = (int)samplesCount;
 				} else {
-					iSample += samplesCount;
+					//Truncate to a valid frame-size in ms; usually this should happend only to the last 'feed' call
+					int frame_sizes_ms_x2[9] = {5, 10, 20, 40, 80, 120, 160, 200, 240};  /* x2 to avoid 2.5 ms */
+					int* ptrVal = frame_sizes_ms_x2 + (sizeof(frame_sizes_ms_x2) / sizeof(frame_sizes_ms_x2[0])) - 1;
+					while(frame_sizes_ms_x2 <= ptrVal){
+						if(samplesCount >= (state->samplerate * (*ptrVal) / 2000)){
+							samplesCount = (state->samplerate * (*ptrVal) / 2000); //Truncate
+							samplesBytes = (samplesCount * state->blockAlign);
+							break;
+						}
+						ptrVal--;
+					}
+				}
+				//Process
+				while(iSample < samplesCount){
+					len = opus_encode(encoder, &data[iSample], (int)(samplesCount - iSample), state->packet, OPUS_MAX_PACKET);
+					if(len < 0 || len > OPUS_MAX_PACKET){
+						OSAR_PRINTF_ERROR("'opus_encode(samples '%d, +%d')' failed.\n", (int)iSample, (int)(samplesCount - iSample));
+						r = FALSE;
+						break;
+					} else {
+						//OSAR_PRINTF_ERROR("'opus_encode(samples '%d, +%d')' success.\n", (int)iSample, (int)(samplesCount - iSample));
+						pack.packet		= state->packet;
+						pack.bytes		= len;
+						pack.b_o_s		= 0;
+						pack.e_o_s		= 0;
+						pack.granulepos	= (((long)state->sampleProcessed + (long)samplesCount)* 48000L / (long)state->samplerate);
+						pack.packetno	= state->oggPacketsCount++;
+						if(samplesCount < state->firstFeedSamplesCount){
+							pack.e_o_s	= 1;
+							state->isEndOfStreamSet = TRUE;
+						}
+						if(ogg_stream_packetin(state->oggStream, &pack) != 0){
+							OSAR_PRINTF_ERROR("'ogg_stream_packetin(opus-packet)' failed.\n");
+							r = FALSE;
+							break;
+						} else {
+							OSARBool errFnd = FALSE;
+							while(ogg_stream_pageout(state->oggStream, &page) != 0){
+								if(fwrite(page.header, 1, page.header_len, dst) != page.header_len){
+									OSAR_PRINTF_ERROR("'fwrite(page.header)(opus-packet)' failed.\n");
+									errFnd = TRUE;
+									break;
+								} else if(fwrite(page.body, 1, page.body_len, dst) != page.body_len){
+									OSAR_PRINTF_ERROR("'fwrite(page.body)(opus-packet)' failed.\n");
+									errFnd = TRUE;
+									break;
+								}
+							}
+							if(errFnd){
+								r = FALSE;
+								break;
+							}
+							//By specs, the granular position is based in 48,000 samples per second
+							state->sampleProcessed += samplesCount; 
+							iSample += samplesCount;
+						} 
+					}
 				}
 			}
 		}
@@ -1433,14 +1571,57 @@ OSARBool OSAudioRecorderEncoderOpusEnd(void* userData, FILE* dst){
 	OSARBool r = FALSE;
 	STOSAudioRecorderEncoderOpusState* state = (STOSAudioRecorderEncoderOpusState*)userData;
 	if(state != NULL){
-		OpusEncoder* encoder = state->encoder;
-		if(encoder != NULL){
-			r = TRUE;
-			opus_encoder_destroy(encoder);
-			state->encoder = encoder = NULL;
+		//Final packet/page
+		{
+			void* dummySamples = NULL;
+			//Create empty 2.5ms last frame (if necesary)
+			if(!state->isEndOfStreamSet){
+				const int samplesCount = (int)(state->samplerate * 5 / 2000); //2.5ms
+				const int samplesBytes = (int)(samplesCount * state->blockAlign);
+				dummySamples = malloc(samplesBytes);
+				memset(dummySamples, 0, samplesBytes);
+				ogg_packet pack;
+				pack.packet		= dummySamples;
+				pack.bytes		= samplesBytes;
+				pack.b_o_s		= 0;
+				pack.e_o_s		= 1;
+				pack.granulepos	= ((state->sampleProcessed + samplesCount) * 48000 / state->samplerate);
+				pack.packetno	= state->oggPacketsCount++;
+				if(ogg_stream_packetin(state->oggStream, &pack) != 0){
+					OSAR_PRINTF_ERROR("'ogg_stream_packetin(eos-packet)' failed.\n");
+				}
+				state->isEndOfStreamSet = TRUE;
+			}
+			//Flush pages
+			{
+				ogg_page page;
+				while(ogg_stream_flush(state->oggStream, &page) != 0){
+					if(fwrite(page.header, 1, page.header_len, dst) != page.header_len){
+						OSAR_PRINTF_ERROR("'fwrite(page.header)(eos-packet)' failed.\n");
+					} else if(fwrite(page.body, 1, page.body_len, dst) != page.body_len){
+						OSAR_PRINTF_ERROR("'fwrite(page.body)(eos-packet)' failed.\n");
+					} else {
+						//
+					}
+				} 
+			}
+			if(dummySamples != NULL){
+				free(dummySamples);
+				dummySamples = NULL;
+			}
+		}
+		if(state->oggStream != NULL){
+			ogg_stream_clear(state->oggStream); //equivalent to 'ogg_stream_destroy()' without 'free()'.
+			free(state->oggStream);
+			state->oggStream = NULL;
+		}
+		if(state->encoder != NULL){
+			opus_encoder_destroy(state->encoder);
+			state->encoder = NULL;
 		}
 		free(state);
 		state = NULL;
+		r = TRUE;
 	}
 	return r;
 }
