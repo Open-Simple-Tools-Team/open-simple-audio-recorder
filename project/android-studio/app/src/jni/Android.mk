@@ -12,9 +12,6 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE		:= osaudiorecorder-core-opus
 
-LOCAL_C_INCLUDES	:=
-LOCAL_SRC_FILES		:= 
-
 LOCAL_CFLAGS		+= -DENABLE_HARDENING=1 -DHAVE_DLFCN_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_LRINT=1 -DHAVE_LRINTF=1 -DHAVE_MEMORY_H=1 -DHAVE_STDINT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRINGS_H=1 -DHAVE_STRING_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_UNISTD_H=1 -DLT_OBJDIR="\".libs/\"" -DOPUS_BUILD -DPACKAGE_BUGREPORT="\"opus@xiph.org\"" -DPACKAGE_NAME="\"opus\"" -DPACKAGE_STRING="\"opus 1.3.1\"" -DPACKAGE_TARNAME="\"opus\"" -DPACKAGE_URL="\"\"" -DPACKAGE_VERSION="\"1.3.1\"" -DSTDC_HEADERS=1 -DVAR_ARRAYS=1 -Drestrict=__restrict
 
 LOCAL_C_INCLUDES	+= \
@@ -30,8 +27,20 @@ LOCAL_C_INCLUDES	+= \
 
 #armeabi-v7a, arm64-v8a, x86, x86_64
 
-ifneq (,$(findstring arm,$(TARGET_ARCH_ABI)))
-  #ARM specifics
+ifeq (armeabi-v7a,$(TARGET_ARCH_ABI))
+  #
+  #ARM v7 specifics
+  #
+  LOCAL_C_INCLUDES	+= \
+    $(AR_INC_ROOT)/opus/celt/arm/  
+  LOCAL_SRC_FILES	+= \
+    $(AR_SRC_ROOT)/opus/celt/arm/arm_celt_map.c
+  LOCAL_SRC_FILES	+= \
+    $(AR_SRC_ROOT)/opus/silk/arm/arm_silk_map.c
+else ifeq (arm64-v8a,$(TARGET_ARCH_ABI))
+  #
+  #ARM v8 specifics
+  #
   LOCAL_C_INCLUDES	+= \
     $(AR_INC_ROOT)/opus/celt/arm/  
   LOCAL_SRC_FILES	+= \
@@ -46,8 +55,31 @@ ifneq (,$(findstring arm,$(TARGET_ARCH_ABI)))
     $(AR_SRC_ROOT)/opus/silk/arm/LPC_inv_pred_gain_neon_intr.c \
     $(AR_SRC_ROOT)/opus/silk/arm/NSQ_del_dec_neon_intr.c \
     $(AR_SRC_ROOT)/opus/silk/arm/NSQ_neon.c
-else ifneq (,$(findstring x86,$(TARGET_ARCH_ABI)))
+else ifeq (x86,$(TARGET_ARCH_ABI))
+  #
   #x86 specifics
+  #
+  LOCAL_CFLAGS		+= -msse4.1
+  LOCAL_C_INCLUDES	+= \
+    $(AR_INC_ROOT)/opus/celt/x86/
+  LOCAL_SRC_FILES	+= \
+    $(AR_SRC_ROOT)/opus/celt/x86/x86cpu.c \
+    $(AR_SRC_ROOT)/opus/celt/x86/x86_celt_map.c \
+    $(AR_SRC_ROOT)/opus/celt/x86/pitch_sse.c \
+    $(AR_SRC_ROOT)/opus/celt/x86/pitch_sse2.c \
+    $(AR_SRC_ROOT)/opus/celt/x86/vq_sse2.c \
+    $(AR_SRC_ROOT)/opus/celt/x86/celt_lpc_sse4_1.c \
+    $(AR_SRC_ROOT)/opus/celt/x86/pitch_sse4_1.c
+  LOCAL_SRC_FILES	+= \
+    $(AR_SRC_ROOT)/opus/silk/x86/NSQ_sse4_1.c \
+    $(AR_SRC_ROOT)/opus/silk/x86/NSQ_del_dec_sse4_1.c \
+    $(AR_SRC_ROOT)/opus/silk/x86/x86_silk_map.c \
+    $(AR_SRC_ROOT)/opus/silk/x86/VAD_sse4_1.c \
+    $(AR_SRC_ROOT)/opus/silk/x86/VQ_WMat_EC_sse4_1.c
+else ifeq (x86_64,$(TARGET_ARCH_ABI))
+  #
+  #x86_64 specifics
+  #
   LOCAL_C_INCLUDES	+= \
     $(AR_INC_ROOT)/opus/celt/x86/
   LOCAL_SRC_FILES	+= \
@@ -219,33 +251,12 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE		:= osaudiorecorder-core-flac
 
-LOCAL_C_INCLUDES	:=
-LOCAL_SRC_FILES		:= 
-
 LOCAL_CFLAGS		+= -DCPU_IS_BIG_ENDIAN=0 -DCPU_IS_LITTLE_ENDIAN=1 -DENABLE_64_BIT_WORDS=0 -DFLAC__ALIGN_MALLOC_DATA=1 -DFLAC__CPU_X86_64=1 -DFLAC__HAS_OGG=0 -DFLAC__HAS_X86INTRIN=1 -DFLAC__NO_ASM=1 -DFLAC__SYS_DARWIN=1 -DHAVE_BSWAP16=1 -DHAVE_BSWAP32=1 -DHAVE_CXX_VARARRAYS=1 -DHAVE_C_VARARRAYS=1 -DHAVE_DLFCN_H=1 -DHAVE_FSEEKO=1 -DHAVE_GETOPT_LONG=1 -DHAVE_ICONV=1 -DHAVE_INTTYPES_H=1 -DHAVE_LANGINFO_CODESET=1 -DHAVE_LROUND=1 -DHAVE_MEMORY_H=1 -DHAVE_STDINT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRINGS_H=1 -DHAVE_STRING_H=1 -DHAVE_SYS_IOCTL_H=1 -DHAVE_SYS_PARAM_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_TERMIOS_H=1 -DHAVE_TYPEOF=1 -DHAVE_UNISTD_H=1 -DHAVE_X86INTRIN_H=1 -DICONV_CONST -DLT_OBJDIR="\".libs/\"" -DPACKAGE="\"flac\"" -DPACKAGE_BUGREPORT="\"flac-dev@xiph.org\"" -DPACKAGE_NAME="\"flac\"" -DPACKAGE_STRING="\"flac 1.3.3\"" -DPACKAGE_TARNAME="\"flac\"" -DPACKAGE_URL="\"https://www.xiph.org/flac/\"" -DPACKAGE_VERSION="\"1.3.3\"" -DSIZEOF_OFF_T=8 -DSIZEOF_VOIDP=8 -DSTDC_HEADERS=1
 
 LOCAL_C_INCLUDES	+= \
   $(AR_INC_ROOT)/flac \
   $(AR_INC_ROOT)/flac/include \
   $(AR_INC_ROOT)/flac/src/libFLAC/include
-
-#armeabi-v7a, arm64-v8a, x86, x86_64
-
-ifneq (,$(findstring arm,$(TARGET_ARCH_ABI)))
-  #ARM specifics
-  LOCAL_C_INCLUDES	+= 
-  LOCAL_SRC_FILES	+= \
-    
-  LOCAL_SRC_FILES	+= \
-    
-else ifneq (,$(findstring x86,$(TARGET_ARCH_ABI)))
-  #x86 specifics
-  LOCAL_C_INCLUDES	+= 
-  LOCAL_SRC_FILES	+= \
-    
-  LOCAL_SRC_FILES	+= \
-    
-endif
 
 LOCAL_SRC_FILES		+= \
   $(AR_SRC_ROOT)/flac/src/libFLAC/bitmath.c \
@@ -311,31 +322,8 @@ include $(CLEAR_VARS)
 
 LOCAL_MODULE		:= osaudiorecorder-core-libogg
 
-LOCAL_C_INCLUDES	:=
-LOCAL_SRC_FILES		:= 
-
-LOCAL_CFLAGS		+= 
-
 LOCAL_C_INCLUDES	+= \
   $(AR_INC_ROOT)/libogg/include
-
-#armeabi-v7a, arm64-v8a, x86, x86_64
-
-ifneq (,$(findstring arm,$(TARGET_ARCH_ABI)))
-  #ARM specifics
-  LOCAL_C_INCLUDES	+= 
-  LOCAL_SRC_FILES	+= \
-    
-  LOCAL_SRC_FILES	+= \
-    
-else ifneq (,$(findstring x86,$(TARGET_ARCH_ABI)))
-  #x86 specifics
-  LOCAL_C_INCLUDES	+= 
-  LOCAL_SRC_FILES	+= \
-    
-  LOCAL_SRC_FILES	+= \
-    
-endif
 
 LOCAL_SRC_FILES		+= \
   $(AR_SRC_ROOT)/libogg/src/framing.c \

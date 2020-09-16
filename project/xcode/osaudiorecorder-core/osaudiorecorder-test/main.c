@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <unistd.h>	//sleep()
 #include <string.h>	//memset
-#include "../../../../src/osaudiorecorder.h"
+#include "../../../../include/osaudiorecorder.h"
 //#include "../../../../src/nixtla-audio/nixtla-audio.h"
 
 /*void test_CaptureBufferFilledCallback(STNix_Engine* engAbs, void* userdata, const STNix_audioDesc audioDesc, const NixUI8* audioData, const NixUI32 audioDataBytes, const NixUI32 audioDataSamples);

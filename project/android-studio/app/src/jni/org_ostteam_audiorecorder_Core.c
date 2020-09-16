@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>	//malloc
 #include <string.h>	//memset
-#include "../../../../../src/osaudiorecorder.h"
+#include "../../../../../include/osaudiorecorder.h"
 
 JNIEXPORT jboolean JNICALL Java_org_ostteam_audiorecorder_Core_engineInit(JNIEnv *jEnv, jobject jObj){
 	jboolean r = JNI_FALSE;

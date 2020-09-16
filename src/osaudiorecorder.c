@@ -9,7 +9,7 @@
 //- Open Simple Audio Recorder - Core
 //-----------------------------------
 
-#include "osaudiorecorder.h"
+#include "../include/osaudiorecorder.h"
 #include <stdlib.h>	//malloc
 #include <string.h>	//memset
 #include "nixtla-audio/nixtla-audio.h"

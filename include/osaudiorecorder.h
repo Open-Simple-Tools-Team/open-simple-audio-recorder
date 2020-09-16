@@ -19,12 +19,12 @@ typedef struct STOSAudioRecorder_ {
 } STOSAudioRecorder;
 
 //--------
-//- Encoder methods
+//- Encoder plugin callbacks
 //--------
 
-typedef void* (*OSAudioRecorderEncoderMethod_start)(FILE* dst, int channels, int bitsPerSample, int samplerate, int blockAlign, int samplesTotal);
-typedef OSARBool (*OSAudioRecorderEncoderMethod_feed)(void* userData, FILE* dst, void* samples, long samplesBytes, long samplesCount);
-typedef OSARBool (*OSAudioRecorderEncoderMethod_end)(void* userData, FILE* dst);
+typedef void*     (*OSAudioRecorderEncoderMethod_start)(FILE* dst, int channels, int bitsPerSample, int samplerate, int blockAlign, int samplesTotal);
+typedef OSARBool  (*OSAudioRecorderEncoderMethod_feed)(void* userData, FILE* dst, void* samples, long samplesBytes, long samplesCount);
+typedef OSARBool  (*OSAudioRecorderEncoderMethod_end)(void* userData, FILE* dst);
 
 //--------
 //- Engine
@@ -33,7 +33,7 @@ typedef OSARBool (*OSAudioRecorderEncoderMethod_end)(void* userData, FILE* dst);
 OSARBool	OSAudioRecorder_init(STOSAudioRecorder* obj); 
 void		OSAudioRecorder_release(STOSAudioRecorder* obj);
 
-//Must be manually called, few times per second (10ps minimun)
+//Must be manually called, few times per second
 void		OSAudioRecorder_tick(STOSAudioRecorder* obj);
 
 //----------------
@@ -46,7 +46,7 @@ OSARBool	OSAudioRecorder_resume(STOSAudioRecorder* obj);
 OSARBool	OSAudioRecorder_stop(STOSAudioRecorder* obj);
 OSARBool	OSAudioRecorder_reset(STOSAudioRecorder* obj);
 
-OSARBool	OSAudioRecorder_isActive(STOSAudioRecorder* obj); //recording or paused
+OSARBool	OSAudioRecorder_isActive(STOSAudioRecorder* obj);		//recording or paused
 OSARBool	OSAudioRecorder_isRecording(STOSAudioRecorder* obj);
 OSARBool	OSAudioRecorder_isPaused(STOSAudioRecorder* obj);
 
@@ -62,18 +62,18 @@ float			OSAudioRecorder_samplesRelAvg(STOSAudioRecorder* obj, const OSARBool res
 //- Player (WAV)
 //--------------
 
-OSARBool OSAudioRecorder_playerLoad(STOSAudioRecorder* obj, const char* filepath, const int buffersPerSec);
-OSARBool OSAudioRecorder_playerPlay(STOSAudioRecorder* obj); 
-OSARBool OSAudioRecorder_playerPause(STOSAudioRecorder* obj);
-OSARBool OSAudioRecorder_playerStop(STOSAudioRecorder* obj);
+OSARBool	OSAudioRecorder_playerLoad(STOSAudioRecorder* obj, const char* filepath, const int buffersPerSec);
+OSARBool	OSAudioRecorder_playerPlay(STOSAudioRecorder* obj); 
+OSARBool	OSAudioRecorder_playerPause(STOSAudioRecorder* obj);
+OSARBool	OSAudioRecorder_playerStop(STOSAudioRecorder* obj);
 
-OSARBool OSAudioRecorder_playerIsLoaded(STOSAudioRecorder* obj);
-OSARBool OSAudioRecorder_playerIsPaused(STOSAudioRecorder* obj);
+OSARBool	OSAudioRecorder_playerIsLoaded(STOSAudioRecorder* obj);
+OSARBool	OSAudioRecorder_playerIsPaused(STOSAudioRecorder* obj);
 
-OSARBool OSAudioRecorder_playerSeekRelPos(STOSAudioRecorder* obj, const float relPos);
+OSARBool	OSAudioRecorder_playerSeekRelPos(STOSAudioRecorder* obj, const float relPos);
 
-float OSAudioRecorder_playerRelProgress(STOSAudioRecorder* obj);
-float OSAudioRecorder_playerSecsTotal(STOSAudioRecorder* obj);
+float		OSAudioRecorder_playerRelProgress(STOSAudioRecorder* obj);
+float		OSAudioRecorder_playerSecsTotal(STOSAudioRecorder* obj);
 
 //------------
 //- Encoder (from WAV to ...)
@@ -83,8 +83,8 @@ OSARBool	OSAudioRecorder_encoderAdd(STOSAudioRecorder* obj, const char* formatId
 
 OSARBool	OSAudioRecorder_encoderStart(STOSAudioRecorder* obj, const char* filepathSrc, const char* filepathDst, const char* outputFormatId);
 OSARBool	OSAudioRecorder_encoderIsLoaded(STOSAudioRecorder* obj);
-float		OSAudioRecorder_encoderRelProgress(STOSAudioRecorder* obj); //Never 1.0f unless is completed
-OSARBool	OSAudioRecorder_encoderFinish(STOSAudioRecorder* obj); //Cancel
+float		OSAudioRecorder_encoderRelProgress(STOSAudioRecorder* obj);	//Never 1.0f unless is completed
+OSARBool	OSAudioRecorder_encoderFinish(STOSAudioRecorder* obj);		//Cancel
 
 #endif /* osaudiorecorder_h */
 

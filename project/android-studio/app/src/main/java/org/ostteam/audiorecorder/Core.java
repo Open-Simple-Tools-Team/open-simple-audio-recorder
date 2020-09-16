@@ -13,11 +13,19 @@ public class Core {
         //
     }
 
+    //--------
+    //- Engine
+    //--------
+
     public native boolean       engineInit();
     public native void		    engineRelease();
 
-    //Must be manually called few times per second (>=10 times per second)
+    //Must be manually called, few times per second
     public native void		    tick();
+
+    //----------------
+    //- Recorder (WAV)
+    //----------------
 
     public native boolean       start(String wavFilepath, int buffersPerSec, boolean keepAvgsOfSamples);
     public native boolean       pause();
@@ -37,7 +45,9 @@ public class Core {
     //Avg of samples from -1 to 1 (warning: overflows if not manually reset preiodically)
     public native float          samplesRelAvg(boolean resetAvg);
 
-    //player
+    //--------------
+    //- Player (WAV)
+    //--------------
 
     public native boolean       playerLoad(String filepath, int buffersPerSec);
     public native boolean       playerPlay();
@@ -49,7 +59,9 @@ public class Core {
     public native float         playerRelProgress();
     public native float         playerSecsTotal();
 
-    //encoder
+    //------------
+    //- Encoder (from WAV to ...)
+    //------------
 
     public native boolean       encoderStart(String filepathIn, String filepathOut, String formatId);
     public native boolean       encoderIsLoaded();
