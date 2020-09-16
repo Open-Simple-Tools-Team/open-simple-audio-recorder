@@ -1,5 +1,6 @@
 **/.idea/workspace.xml
 **/.idea/tasks.xml
+**/.idea/caches
 .gradle
 project/android-studio/app/src/obj
 project/xcode/osaudiorecorder-core/osaudiorecorder.xcodeproj/xcuserdata

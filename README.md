@@ -70,8 +70,9 @@ Audio capture example:
 STOSAudioRecorder rec;
 if(OSAudioRecorder_init(&rec)){
 	const char* filepath = "test2.wav";
+	//Start
 	if(OSAudioRecorder_start(&rec, filepath, 30, FALSE)){
-		//Wait few seconds
+		//Wait few seconds ("tick" must be called)
 		{
 			unsigned long long slept = 0;
 			while(slept < (5 * 1000000)){
@@ -80,6 +81,7 @@ if(OSAudioRecorder_init(&rec)){
 				OSAudioRecorder_tick(&rec);
 			}
 		}
+		//Stop
 		OSAudioRecorder_stop(&rec);
 	}
 	OSAudioRecorder_release(&rec);
@@ -93,49 +95,31 @@ Important: the player/encoder are intended for WAV files produced by the recorde
 ```
 STOSAudioRecorder rec;
 if(OSAudioRecorder_init(&rec)){
-	const char* filepath = "test2.wav";
-	//Encode FLAC
-	{
-		const char* filepathDst = "test2.flac";
-		if(!OSAudioRecorder_encoderStart(&rec, filepath, filepathDst, "flac")){
-			printf("ERROR, 'OSAudioRecorder_encoderStart' failed.\n");
-		} else {
-			//Wait for "1.0f" progress
-			float prog = 0.0f;
-			while(OSAudioRecorder_encoderIsLoaded(&rec)){
-				usleep(100000);
-				prog = OSAudioRecorder_encoderRelProgress(&rec); //never 1.0f unless done
-				printf("INFO, 'OSAudioRecorder_encoderRelProgress': %d%%.\n", (int)(prog * 100.0f));
-				if(prog >= 1.0f){
-					break;
-				}
+	//Params
+	const char* filepathSrc = "test2.wav";
+	const char* filepathDst = "test2.flac"; //"test2.opus"
+	const char* encoderId = "flac"; //"opus"
+	//Encode
+	if(!OSAudioRecorder_encoderStart(&rec, filepathSrc, filepathDst, encoderId)){
+		printf("ERROR, 'OSAudioRecorder_encoderStart' failed.\n");
+	} else {
+		//Wait for "1.0f" progress
+		float prog = 0.0f;
+		while(OSAudioRecorder_encoderIsLoaded(&rec)){
+			usleep(100000);
+			prog = OSAudioRecorder_encoderRelProgress(&rec); //never 1.0f unless done
+			if(prog >= 1.0f){
+				break;
 			}
-			OSAudioRecorder_encoderFinish(&rec);
 		}
-	}
-	//Encode OPUS
-	{
-		const char* filepathDst = "test2.opus";
-		if(!OSAudioRecorder_encoderStart(&rec, filepath, filepathDst, "opus")){
-			printf("ERROR, 'OSAudioRecorder_encoderStart' failed.\n");
-		} else {
-			//Wait for "1.0f" progress
-			float prog = 0.0f;
-			while(OSAudioRecorder_encoderIsLoaded(&rec)){
-				usleep(100000);
-				prog = OSAudioRecorder_encoderRelProgress(&rec); //never 1.0f unless done
-				printf("INFO, 'OSAudioRecorder_encoderRelProgress': %d%%.\n", (int)(prog * 100.0f));
-				if(prog >= 1.0f){
-					break;
-				}
-			}
-			OSAudioRecorder_encoderFinish(&rec);
-		}
+		//Finish
+		OSAudioRecorder_encoderFinish(&rec);
 	}
 	OSAudioRecorder_release(&rec);
 }
 ```
 
+Note: each 'STOSAudioRecorder' instance have an internal recorder, player and encoder. You can use the same instance for the three operations.
 
 # How to add new encoders
 

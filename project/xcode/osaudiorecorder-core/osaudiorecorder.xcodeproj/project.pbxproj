@@ -443,7 +443,7 @@
 		2CA911222507FEA600EFDF71 /* bands.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = bands.c; sourceTree = "<group>"; };
 		2CA911292508072600EFDF71 /* osaudiorecorder-test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "osaudiorecorder-test"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2CA9112B2508072600EFDF71 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
-		2CA911322508738900EFDF71 /* osaudiorecorder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = osaudiorecorder.h; sourceTree = "<group>"; };
+		2CA911322508738900EFDF71 /* osaudiorecorder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = osaudiorecorder.h; path = ../include/osaudiorecorder.h; sourceTree = "<group>"; };
 		2CA91134250873A300EFDF71 /* osaudiorecorder.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = osaudiorecorder.c; sourceTree = "<group>"; };
 		2CA91136250892F000EFDF71 /* org_ostteam_audiorecorder_Core.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = org_ostteam_audiorecorder_Core.h; path = "../project/android-studio/app/src/jni/org_ostteam_audiorecorder_Core.h"; sourceTree = "<group>"; };
 		2CA91137250892F000EFDF71 /* org_ostteam_audiorecorder_Core.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = org_ostteam_audiorecorder_Core.c; path = "../project/android-studio/app/src/jni/org_ostteam_audiorecorder_Core.c"; sourceTree = "<group>"; };

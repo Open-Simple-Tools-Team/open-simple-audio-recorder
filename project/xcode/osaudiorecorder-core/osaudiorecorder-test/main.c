@@ -9,27 +9,6 @@
 #include <unistd.h>	//sleep()
 #include <string.h>	//memset
 #include "../../../../include/osaudiorecorder.h"
-//#include "../../../../src/nixtla-audio/nixtla-audio.h"
-
-/*void test_CaptureBufferFilledCallback(STNix_Engine* engAbs, void* userdata, const STNix_audioDesc audioDesc, const NixUI8* audioData, const NixUI32 audioDataBytes, const NixUI32 audioDataSamples);
-
-typedef struct STARRiffWaveChunckHead_ {
-	char	cid[4];	//chunk-id
-	NixUI32 size;	//size excluding one-bytepadding
-} STARRiffWaveChunckHead;
-
-#define WAVE_FORMAT_PCM			1
-#define WAVE_FORMAT_IEEE_FLOAT	3
-
-typedef struct STARRiffWaveChunckFmt_ {
-	STARRiffWaveChunckHead	head;
-	NixUI16					format;		//WAVE_FORMAT_PCM=1 WAVE_FORMAT_IEEE_FLOAT=3
-	NixUI16					channels;
-	NixUI32					samplesPerSec;
-	NixUI32					avgBytesPerSec;
-	NixUI16					blocksAlign;
-	NixUI16					bitsPerSample;
-} STARRiffWaveChunckFmt;*/
 
 int main(int argc, const char * argv[]) {
 	// insert code here...
@@ -152,14 +131,3 @@ int main(int argc, const char * argv[]) {
 	printf("...end-of-program.\n");
 	return 0;
 }
-
-/*void test_CaptureBufferFilledCallback(STNix_Engine* engAbs, void* userdata, const STNix_audioDesc audioDesc, const NixUI8* audioData, const NixUI32 audioDataBytes, const NixUI32 audioDataSamples){
-	//Write wave data
-	FILE** file = (FILE**)userdata;
-	if(file != NULL && audioData != NULL && audioDataBytes > 0){
-		if(*file != NULL){
-			fwrite(audioData, audioDataBytes, 1, *file);
-			fflush(*file);
-		}
-	}
-}*/

@@ -50,7 +50,7 @@ public class MainActivity  extends AppCompatActivity {
     private String _encFilename = "";
 
     //Permission request
-    private static final int _PERM_REQUEST_ID = 123890;
+    private static final int _PERM_REQUEST_ID = 987;
 
     //UI elements
     private TextView _txtTittle     = null;
