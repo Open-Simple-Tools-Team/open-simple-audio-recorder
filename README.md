@@ -8,8 +8,10 @@ The main code is designed in atomic-files, only one ".h" header and one ".c" sou
 
 External code (flac, libogg, nixtla-audio and opus) brings their own structure, but should be as easy to "uncompress" and compile the main project. No need to compile those libraries individually.
 
+You can use our binary files or compile your own; please use our "jni/Android.mk" and "osaudiorecorder.xcodeproj" files as reference.
+
 # Apps and platforms
-Currently an Android app with android-studio project is available. A MacOS command tool with a Xcode project is available.
+Currently an Android app with android-studio project is available. A MacOS command tool with a XCode project is available.
 
 The code is intended to be universal, and should be a step or two away from compiling to other platforms, like iOS, Windows or Linux.
 
