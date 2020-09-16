@@ -20,26 +20,33 @@ The code is intended to be universal, and should be a step or two away from comp
 Copy these files into your project:
 
 Java header
-```/project/android-studio/app/src/main/java/org/ostteam/audiorecorder/Core.java
+```
+/project/android-studio/app/src/main/java/org/ostteam/audiorecorder/Core.java
 ```
 
+
 JNI libraries
-```/project/android-studio/app/src/libs/arm64-v8a/libosaudiorecorder-core.so
+```
+/project/android-studio/app/src/libs/arm64-v8a/libosaudiorecorder-core.so
 /project/android-studio/app/src/libs/armeabi-v7a/libosaudiorecorder-core.so
 /project/android-studio/app/src/libs/x86/libosaudiorecorder-core.so
 /project/android-studio/app/src/libs/x86_64/libosaudiorecorder-core.so
 ```
 
+
 Add permissions to your AndroidManifest.xml:
 
-```<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+```
+<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
 <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 ```
 
-Set your build.gradle to inlcude the libraries:
 
-```android {
+Set your build.gradle to include the libraries in the package:
+
+```
+android {
     sourceSets {
         main {
             jniLibs.srcDir 'src/libs'
@@ -47,6 +54,7 @@ Set your build.gradle to inlcude the libraries:
     }
 }
 ```
+
 
 Uset the Core methods as in our Android project. We hope the library methods are intitutive for you.
 
@@ -56,7 +64,8 @@ Compile or use our already compiled libraries.
 
 Audio capture example:
 
-```STOSAudioRecorder rec;
+```
+STOSAudioRecorder rec;
 if(OSAudioRecorder_init(&rec)){
 	const char* filepath = "test2.wav";
 	if(OSAudioRecorder_start(&rec, filepath, 30, FALSE)){
@@ -75,10 +84,12 @@ if(OSAudioRecorder_init(&rec)){
 }
 ```
 
+
 Audio encoder example:
 Important: the player/encoder are intended for WAV files produced by the recorder. This is not an universal player/encoder.
 
-```STOSAudioRecorder rec;
+```
+STOSAudioRecorder rec;
 if(OSAudioRecorder_init(&rec)){
 	const char* filepath = "test2.wav";
 	//Encode FLAC
@@ -123,11 +134,13 @@ if(OSAudioRecorder_init(&rec)){
 }
 ```
 
+
 # How to add new encoders
 
 Define these three methods:
 
-```void* myEncoderStart(FILE* dst, int channels, int bitsPerSample, int samplerate, int blockAlign, int samplesTotal){
+```
+void* myEncoderStart(FILE* dst, int channels, int bitsPerSample, int samplerate, int blockAlign, int samplesTotal){
 	void* myStateData = NULL;
 	//Allocate your state data, init and write the necesary header to the file.
 	//Keep a copy of channels, bitsPerSample, samplerate, blockAlign and samplesTotal values if necesary.
@@ -148,8 +161,17 @@ OSARBool myEncoderEnd(void* userData, FILE* dst){
 	return r;
 }
 ```
+
 Register your encoder:
 
-```OSAudioRecorder_encoderAdd(obj, "myEncoderId", myEncoderStart, myEncoderFeed, myEncoderEnd);
 ```
+OSAudioRecorder_encoderAdd(obj, "myEncoderId", myEncoderStart, myEncoderFeed, myEncoderEnd);
+```
+
+
+# About "tick"
+
+This library is not thread safe. You should call the methods from the main/ui thread, and you must call "OSAudioRecorder_tick" few times per second to trigger the internal management of buffers of the library.
+
+Any encoding process runs in a secondary thread and does not requires the call of "OSAudioRecorder_tick".
 
