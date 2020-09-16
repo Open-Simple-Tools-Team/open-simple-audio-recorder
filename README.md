@@ -13,6 +13,8 @@ Currently an Android app with android-studio project is available. A MacOS comma
 
 The code is intended to be universal, and should be a step or two away from compiling to other platforms, like iOS, Windows or Linux.
 
+![alt text](res/screenshot/Screenshot_20200912-001218.png?raw=true "Android App")
+
 # History
 (Sept/2020) This project was originally commisioned by Inti Luna to Marcos Ortega as a tool for audio recording compatibe with the Open Data Kit (ODK) Collect Android App.
 
