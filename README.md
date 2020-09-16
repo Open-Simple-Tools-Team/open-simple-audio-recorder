@@ -98,7 +98,7 @@ if(OSAudioRecorder_init(&rec)){
 		if(!OSAudioRecorder_encoderStart(&rec, filepath, filepathDst, "flac")){
 			printf("ERROR, 'OSAudioRecorder_encoderStart' failed.\n");
 		} else {
-			//Wait few seconds
+			//Wait for "1.0f" progress
 			float prog = 0.0f;
 			while(OSAudioRecorder_encoderIsLoaded(&rec)){
 				usleep(100000);
@@ -117,7 +117,7 @@ if(OSAudioRecorder_init(&rec)){
 		if(!OSAudioRecorder_encoderStart(&rec, filepath, filepathDst, "opus")){
 			printf("ERROR, 'OSAudioRecorder_encoderStart' failed.\n");
 		} else {
-			//Wait few seconds
+			//Wait for "1.0f" progress
 			float prog = 0.0f;
 			while(OSAudioRecorder_encoderIsLoaded(&rec)){
 				usleep(100000);
@@ -142,16 +142,24 @@ Define these three methods:
 ```
 void* myEncoderStart(FILE* dst, int channels, int bitsPerSample, int samplerate, int blockAlign, int samplesTotal){
 	void* myStateData = NULL;
-	//Allocate your state data, init and write the necesary header to the file.
-	//Keep a copy of channels, bitsPerSample, samplerate, blockAlign and samplesTotal values if necesary.
+	//
+	//Allocate your state data, init and write the
+	//necesary header to the file.
+	//Keep a copy of channels, bitsPerSample,
+	//samplerate, blockAlign and samplesTotal
+	//values if necesary.
+	//
 	return myStateData;
 }
 
 OSARBool myEncoderFeed(void* userData, FILE* dst, void* samples, long samplesBytes, long samplesCount){
 	OSARBool r = FALSE;
 	void* myStateData = userData;
+	//
 	//Write the PCM samples to the file.
-	return r;
+	//
+	//return FALSE for error and stop; 'myEncoderEnd' will be called.
+	return r; 
 }
 
 OSARBool myEncoderEnd(void* userData, FILE* dst){
