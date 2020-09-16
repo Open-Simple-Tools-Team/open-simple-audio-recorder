@@ -4,9 +4,7 @@ App and core for audio recording with Open and Royalty-free encoders and softwar
 # Core
 The core is a C library and supports the inclussion of encoders as plugins.
 
-The main code is designed in atomic-files, only one ".h" header and one ".c" source encapsulates the logic of the library.
-
-External code (flac, libogg, nixtla-audio and opus) brings their own structure, but should be as easy to "uncompress" and compile the main project. No need to compile those libraries individually.
+The main code is designed in atomic-files, only one ".h" header and one ".c" source encapsulates the logic of the library. External code (flac, libogg, nixtla-audio and opus) brings their own structure, but should be as easy to "uncompress" and compile the main project. No need to compile those libraries individually.
 
 You can use our binary files or compile your own; please use our "jni/Android.mk" and "osaudiorecorder.xcodeproj" files as reference.
 
@@ -178,6 +176,15 @@ Register your encoder:
 OSAudioRecorder_encoderAdd(obj, "myEncoderId", myEncoderStart, myEncoderFeed, myEncoderEnd);
 ```
 
+Use your encoder:
+
+```
+...
+if(OSAudioRecorder_encoderStart(&rec, filepath, filepathDst, "myEncoderId")){
+	...
+}
+...
+```
 
 # About "tick"
 
