@@ -7,8 +7,8 @@ android {
         applicationId "org.ostteam.audiorecorder.android"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 3
-        versionName "1.0.2"
+        versionCode 5
+        versionName "1.0.4"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -20,7 +20,7 @@ android {
         }
     }
 
-    ndkVersion "19.2.5345600"
+    ndkVersion "21.3.6528147"
 
     sourceSets {
         main {

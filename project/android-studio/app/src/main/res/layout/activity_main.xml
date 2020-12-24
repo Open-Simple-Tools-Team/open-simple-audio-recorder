@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:keepScreenOn="true"
     tools:context=".MainActivity">
 
     <org.ostteam.audiorecorder.android.SamplesGraph
@@ -90,11 +91,29 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <TextView
+        android:id="@+id/txtFormat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/playTimeline"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:fontFamily="sans-serif-black"
+        android:gravity="center_vertical"
+        android:maxLines="1"
+        android:minLines="1"
+        android:onClick="txtFormatAction"
+        android:singleLine="true"
+        android:text=".opus"
+        android:textAlignment="center"
+        android:textSize="24sp" />
+
     <ImageButton
         android:id="@+id/btnPlay"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/playTimeline"
+        android:layout_below="@id/txtFormat"
         android:layout_alignParentBottom="true"
         android:background="#00FFFFFF"
         android:onClick="btnPlay"
@@ -106,7 +125,7 @@
         android:id="@+id/btnStop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/playTimeline"
+        android:layout_below="@id/txtFormat"
         android:layout_alignParentBottom="true"
         android:background="#00FFFFFF"
         android:onClick="btnStop"
@@ -119,7 +138,7 @@
         android:id="@+id/btnDone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/playTimeline"
+        android:layout_below="@id/txtFormat"
         android:layout_alignParentBottom="true"
         android:background="#00FFFFFF"
         android:onClick="btnShare"
@@ -131,12 +150,14 @@
         android:id="@+id/btnDelete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/playTimeline"
+        android:layout_below="@id/txtFormat"
         android:layout_alignParentBottom="true"
         android:background="#00FFFFFF"
         android:onClick="btnDelete"
         android:tint="#B24440"
         app:srcCompat="@mipmap/delete"
         tools:layout_editor_absoluteX="233dp" />
+
+
 
 </android.widget.RelativeLayout>

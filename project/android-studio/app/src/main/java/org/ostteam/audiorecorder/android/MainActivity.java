@@ -15,8 +15,10 @@ import java.util.TimerTask;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -30,6 +32,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -64,6 +67,7 @@ public class MainActivity  extends AppCompatActivity {
     private ImageButton _btnDone    = null;
     private ImageButton _btnStop    = null;
     private ImageButton _btnDelete  = null;
+    private TextView _txtFormat     = null;
 
     //Colors
     private final int _colorMicGreen   = Color.argb(255, 82, 178, 64);
@@ -80,6 +84,9 @@ public class MainActivity  extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //
+        this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        //this.setKeepScreenOn(true);
+        //
         _txtTittle  = (TextView) findViewById(R.id.txtTittle);
         _txtTime    = (TextView) findViewById(R.id.txtTime);
         _graphSamples = (SamplesGraph)findViewById(R.id.graphSamples);
@@ -90,6 +97,7 @@ public class MainActivity  extends AppCompatActivity {
         _btnDone    = (ImageButton)findViewById(R.id.btnDone);
         _btnStop    = (ImageButton)findViewById(R.id.btnStop);
         _btnDelete  = (ImageButton)findViewById(R.id.btnDelete);
+        _txtFormat  = (TextView) findViewById(R.id.txtFormat);
         {
             ViewParent parent = _btnMic.getParent();
             if (parent == null) {
@@ -108,6 +116,16 @@ public class MainActivity  extends AppCompatActivity {
                         }
                     });
                 }
+            }
+        }
+        //
+        {
+            SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+            if(pref != null) {
+                String format = pref.getString("format", "opus");
+                if(format == null) format = "opus";
+                if(format == "") format = "opus";
+                _txtFormat.setText("*." + format);
             }
         }
         //
@@ -335,99 +353,93 @@ public class MainActivity  extends AppCompatActivity {
 
     public void btnShare(View view){
         if(_rec.samplesCount() > 0) {
-            String[] formats = { getString(R.string.fmt_desc_wav), getString(R.string.fmt_desc_flac), getString(R.string.fmt_desc_opus) };
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Seleccione un formato");
-            builder.setItems(formats, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    switch (which){
-                        case 1:
-                            if(_rec.encoderIsLoaded()) {
-                                if(_rec.encoderRelProgress() == 1.0f){
-                                    _rec.encoderFinish();
-                                }
-                            }
-                            if(_rec.encoderIsLoaded()){
-                                Log.e("OSAR", "other encoder is active");
-                                Toast.makeText(getBaseContext(), getString(R.string.enc_bussy), Toast.LENGTH_SHORT).show();
-                            } else {
-                                try {
-                                    File fileIn     = new File(getExternalCacheDir(), "OSSAudioRecorder.wav");
-                                    File fileOut    = File.createTempFile("OSSAudioRecorder", ".flac", getExternalCacheDir());
-                                    if(!_rec.encoderStart(fileIn.getAbsolutePath(), fileOut.getAbsolutePath(), "flac")){
-                                        Log.e("OSAR", "encoder failed");
-                                        Toast.makeText(getBaseContext(), getString(R.string.enc_err_start), Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        _encFilename = fileOut.getName();
-                                        syncUserInterface();
-                                    }
-                                } catch (Exception e){
-                                    Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                            break;
-                        case 2:
-                            if(_rec.encoderIsLoaded()) {
-                                if(_rec.encoderRelProgress() == 1.0f){
-                                    _rec.encoderFinish();
-                                }
-                            }
-                            if(_rec.encoderIsLoaded()){
-                                Log.e("OSAR", "other encoder is active");
-                                Toast.makeText(getBaseContext(), getString(R.string.enc_bussy), Toast.LENGTH_SHORT).show();
-                            } else {
-                                try {
-                                    File fileIn     = new File(getExternalCacheDir(), "OSSAudioRecorder.wav");
-                                    File fileOut    = File.createTempFile("OSSAudioRecorder", ".opus", getExternalCacheDir());
-                                    if(!_rec.encoderStart(fileIn.getAbsolutePath(), fileOut.getAbsolutePath(), "opus")){
-                                        Log.e("OSAR", "encoder failed");
-                                        Toast.makeText(getBaseContext(), getString(R.string.enc_err_start), Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        _encFilename = fileOut.getName();
-                                        syncUserInterface();
-                                    }
-                                } catch (Exception e){
-                                    Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                            break;
-                        default:
+            SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+            if(pref != null) {
+                String format = pref.getString("format", "opus");
+                if (format == null) format = "opus";
+                if (format == "") format = "opus";
+                if (format.equals("wav")) {
+                    try {
+                        File fileIn = new File(getExternalCacheDir(), "OSSAudioRecorder.wav");
+                        File fileOut = File.createTempFile("OSSAudioRecorder", ".wav", getExternalCacheDir());
+                        //Copy file
+                        {
+                            InputStream in = new FileInputStream(fileIn);
                             try {
-                                File fileIn     = new File(getExternalCacheDir(), "OSSAudioRecorder.wav");
-                                File fileOut    = File.createTempFile("OSSAudioRecorder", ".wav", getExternalCacheDir());
-                                //Copy file
-                                {
-                                    InputStream in = new FileInputStream(fileIn);
-                                    try {
-                                        OutputStream out = new FileOutputStream(fileOut);
-                                        try {
-                                            // Transfer bytes from in to out
-                                            byte[] buf = new byte[1024];
-                                            int len;
-                                            while ((len = in.read(buf)) > 0) {
-                                                out.write(buf, 0, len);
-                                            }
-                                        } catch (Exception e){
-                                            Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                                        } finally {
-                                            out.close();
-                                        }
-                                    } catch (Exception e){
-                                        Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                                    } finally {
-                                        in.close();
+                                OutputStream out = new FileOutputStream(fileOut);
+                                try {
+                                    // Transfer bytes from in to out
+                                    byte[] buf = new byte[1024];
+                                    int len;
+                                    while ((len = in.read(buf)) > 0) {
+                                        out.write(buf, 0, len);
                                     }
+                                } catch (Exception e) {
+                                    Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                                } finally {
+                                    out.close();
                                 }
-                                btnShare(null, fileOut.getName());
-                            } catch (Exception e){
+                            } catch (Exception e) {
                                 Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                            } finally {
+                                in.close();
                             }
-                            break;
+                        }
+                        btnShare(null, fileOut.getName());
+                    } catch (Exception e) {
+                        Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                } else if (format.equals("flac")) {
+                    if (_rec.encoderIsLoaded()) {
+                        if (_rec.encoderRelProgress() == 1.0f) {
+                            _rec.encoderFinish();
+                        }
+                    }
+                    if (_rec.encoderIsLoaded()) {
+                        Log.e("OSAR", "other encoder is active");
+                        Toast.makeText(getBaseContext(), getString(R.string.enc_bussy), Toast.LENGTH_SHORT).show();
+                    } else {
+                        try {
+                            File fileIn = new File(getExternalCacheDir(), "OSSAudioRecorder.wav");
+                            File fileOut = File.createTempFile("OSSAudioRecorder", ".flac", getExternalCacheDir());
+                            if (!_rec.encoderStart(fileIn.getAbsolutePath(), fileOut.getAbsolutePath(), "flac")) {
+                                Log.e("OSAR", "encoder failed");
+                                Toast.makeText(getBaseContext(), getString(R.string.enc_err_start), Toast.LENGTH_SHORT).show();
+                            } else {
+                                _encFilename = fileOut.getName();
+                                syncUserInterface();
+                            }
+                        } catch (Exception e) {
+                            Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                } else {
+                    //opus
+                    if (_rec.encoderIsLoaded()) {
+                        if (_rec.encoderRelProgress() == 1.0f) {
+                            _rec.encoderFinish();
+                        }
+                    }
+                    if (_rec.encoderIsLoaded()) {
+                        Log.e("OSAR", "other encoder is active");
+                        Toast.makeText(getBaseContext(), getString(R.string.enc_bussy), Toast.LENGTH_SHORT).show();
+                    } else {
+                        try {
+                            File fileIn = new File(getExternalCacheDir(), "OSSAudioRecorder.wav");
+                            File fileOut = File.createTempFile("OSSAudioRecorder", ".opus", getExternalCacheDir());
+                            if (!_rec.encoderStart(fileIn.getAbsolutePath(), fileOut.getAbsolutePath(), "opus")) {
+                                Log.e("OSAR", "encoder failed");
+                                Toast.makeText(getBaseContext(), getString(R.string.enc_err_start), Toast.LENGTH_SHORT).show();
+                            } else {
+                                _encFilename = fileOut.getName();
+                                syncUserInterface();
+                            }
+                        } catch (Exception e) {
+                            Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
-            });
-            builder.show();
+            }
         }
     }
 
@@ -504,6 +516,44 @@ public class MainActivity  extends AppCompatActivity {
         }
     }
 
+    public void txtFormatAction(View view){
+        String[] formats = { getString(R.string.fmt_desc_opus), getString(R.string.fmt_desc_flac), getString(R.string.fmt_desc_wav) };
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Seleccione un formato");
+        builder.setItems(formats, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                SharedPreferences pref = getPreferences(Context.MODE_PRIVATE);
+                if(pref != null) {
+                    SharedPreferences.Editor editor = pref.edit();
+                    if (editor != null) {
+                        switch (which) {
+                            case 1:
+                                editor.putString("format", "flac");
+                                editor.apply();
+                                _txtFormat.setText("*.flac");
+                                syncUserInterface();
+                                break;
+                            case 2:
+                                editor.putString("format", "wav");
+                                editor.apply();
+                                _txtFormat.setText("*.wav");
+                                syncUserInterface();
+                                break;
+                            default:
+                                editor.putString("format", "opus");
+                                editor.apply();
+                                _txtFormat.setText("*.opus");
+                                syncUserInterface();
+                                break;
+                        }
+                    }
+                }
+            }
+        });
+        builder.show();
+    }
+
     private void updateTimeTag(float secs){
         int recMins = (int)secs / 60;
         secs -= (recMins * 60);
@@ -532,6 +582,7 @@ public class MainActivity  extends AppCompatActivity {
         int stopVsb = View.INVISIBLE;
         int doneVsb = View.INVISIBLE;
         int deleteVsb = View.INVISIBLE;
+        int formatVsb = View.INVISIBLE;
         String title = "";
         //Collect props
         if(_rec.playerIsLoaded()){
@@ -565,11 +616,13 @@ public class MainActivity  extends AppCompatActivity {
                     doneVsb = View.VISIBLE;
                     deleteVsb = View.VISIBLE;
                 }
+                formatVsb = View.VISIBLE;
             } else if (!_rec.isRecording()) {
                 Drawable btnDraw = _btnMic.getDrawable();
                 btnDraw.setTint(this._colorMicYellow);
                 title = getString(R.string.tit_rec_paused);
                 stopVsb = View.VISIBLE;
+                formatVsb = View.VISIBLE;
             } else {
                 Drawable btnDraw = _btnMic.getDrawable();
                 btnDraw.setTint(this._colorMicRed);
@@ -617,13 +670,16 @@ public class MainActivity  extends AppCompatActivity {
         if(_btnDelete.getVisibility() != deleteVsb){
             _btnDelete.setVisibility(deleteVsb);
         }
+        if(_txtFormat.getVisibility() != formatVsb){
+            _txtFormat.setVisibility(formatVsb);
+        }
         //Lower buttons (layout visibles)
         {
-            ImageButton btns[] = { _btnDone, _btnPlay, _btnStop, _btnDelete};
+            View btns[] = { _btnDone, _btnPlay, _btnStop, _btnDelete };
             int i, visibleCount = 0, visibleWidth = 0;
             //Count visibles
             for(i = 0; i < btns.length; i++){
-                ImageButton btn = btns[i];
+                View btn = btns[i];
                 if(btn.getVisibility() == View.VISIBLE) {
                     int width2 = btn.getWidth();
                     visibleWidth += width2;
@@ -655,7 +711,7 @@ public class MainActivity  extends AppCompatActivity {
                     int xLeft = (width - visibleWidth - ((visibleCount - 1) * marginH)) / 2;
                     Log.i("", "width(" + width + ")");
                     for (i = 0; i < btns.length; i++) {
-                         ImageButton btn = btns[i];
+                         View btn = btns[i];
                          if(btn.getVisibility() == View.VISIBLE) {
                              int width2 = btn.getWidth();
                              android.widget.RelativeLayout.LayoutParams params = (android.widget.RelativeLayout.LayoutParams)btn.getLayoutParams();
